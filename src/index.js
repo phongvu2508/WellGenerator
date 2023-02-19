@@ -2,10 +2,10 @@
 
 const readline = require('readline');
 
-const { findTopLeftPoint, findBottomLeftPoint } = require('./helpers/polygonHelper')
+const { generateHorizontalWells } = require('./wellGenerator')
 
 let geometry; // Geojson file path - the path to the geojson file.
-let azimuthl; // angle degree - the direction of the well.
+let azimuth; // angle degree - the direction of the well.
 let numberOfLayers; // integer - number of layers.
 let maxLength; // number - max length of the well in meters
 let spacing; // number - the spacing between the wells.
@@ -29,11 +29,11 @@ const getGeometry = () => {
     })
 }
 
-const getAzimuthl = () => {
+const getAzimuth = () => {
     return new Promise((resolve, reject) => {
         rl.question('Please enter the angle degree of the well: ', (answer) => {
             // TODO: validate input
-            azimuthl = answer;
+            azimuth = answer;
             resolve()
         })
     })
@@ -104,7 +104,7 @@ const getLayerVerticalOffset = () => {
         rl.question('Please enter the vertical offsets between layers:', (answer) => {
             // TODO: validate input
             // TODO: foreach to read each offset
-            layerVerticalOffset = answer;
+            layerVerticalOffset = answer.split(",");
             resolve()
         })
     })
@@ -113,7 +113,7 @@ const getLayerVerticalOffset = () => {
 
 const app = async () => {
     await getGeometry();
-    await getAzimuthl();
+    await getAzimuth();
     await getNumberOfLayers();
     await getMaxLength();
     await getSpacing();
@@ -127,7 +127,7 @@ const app = async () => {
     // TODO: run validate on overall inputs
 
     console.log(geometry);
-    console.log(azimuthl);
+    console.log(azimuth);
     console.log(numberOfLayers);
     console.log(maxLength);
     console.log(spacing);
@@ -135,6 +135,10 @@ const app = async () => {
     console.log(leftLateralOffset);
     console.log(rightLateralOffset);
     console.log(layerVerticalOffset);
+
+    const wells = generateHorizontalWells(geometry, azimuth, numberOfLayers, maxLength, spacing, initialDepth, leftLateralOffset, rightLateralOffset, layerVerticalOffset);
+
+    console.log(`Here are the most optimized wells we can have within specified polygon: ${wells}`);
 }
 
 app();
