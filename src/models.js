@@ -7,4 +7,9 @@ const AngleType = {
     BOTTOM_RIGHT: 'bottom right'
 }
 
-module.exports = { AngleType }
+const DrawingDirection = {
+    LEFT: 'left',
+    RIGHT: 'right'
+}
+
+module.exports = { AngleType, DrawingDirection }
