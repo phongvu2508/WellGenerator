@@ -260,7 +260,7 @@ const app = async () => {
         return;
     }
 
-    console.log("geometry : " + _geometry);
+    console.log("geometry : " + JSON.stringify(_geometry).substring(0, 50) + "...");
     console.log("azimuth : " + _azimuth);
     console.log("numberOfLayers : " + _numberOfLayers);
     console.log("maxLength : " + _maxLength);
@@ -268,7 +268,7 @@ const app = async () => {
     console.log("initialDepth : " + _initialDepth);
     console.log("leftLateralOffset : " + _leftLateralOffset);
     console.log("rightLateralOffset : " + _rightLateralOffset);
-    console.log(`layerVerticalOffset : ${_layerVerticalOffset}`);
+    console.log(`layerVerticalOffset : [${_layerVerticalOffset}]`);
 
     const wells = generateHorizontalWells(_geometry, _azimuth, _numberOfLayers, _maxLength, _spacing, _initialDepth, _leftLateralOffset, _rightLateralOffset, _layerVerticalOffset);
 
