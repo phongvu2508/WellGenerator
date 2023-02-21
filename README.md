@@ -28,8 +28,10 @@ MULTILINESTRING Z((10 10 1, 20 20 3, 10 40 4),(40 40 4, 30 30 1, 40 20 4, 30 10 
 - Turf library was used extensively on polygon calculating (https://github.com/Turfjs/turf/).
 - [*Limitation*] The algorithm was only be tested agains the simple polygon, I haven't test the code with complex polygon, also can't be sure if the algorithm still work with the those complex case.
 ![Simple Polygons](example-simple-polygons.png)
+
 The algorithm should work well with the above polygons.
 ![Complex Polygons](example-complex-polygons.png)
+
 The algorithm unlikely to work with the above polygons.
 - I tried to not spend a ton of time on the excercise, as I don't think it will help anyone of us.
 - Therefore, there is not a lot of testing, also no unit tests...
@@ -38,16 +40,22 @@ The algorithm unlikely to work with the above polygons.
 ## Implementation strategy
 - Based on the **azimuth**, determind the first point and draw the first well, of the first layer.
 > 0 < azimuth > 90 -> select the bottom left most of the polygon and draw to the right
+
 > 90 < azimuth > 180 -> select the top left most of the polygon and draw  to the right
+
 > 180 < azimuth > 270 -> select the top right most of the polygon and draw to the left
+
 > 270 < azimuth > 360 -> select the bottom right most of the polygon and draw to the left
+
 > I also consider to select the first point as the centre mass of the polygon, and draw to both side, but I conside this is not the most performance sufficient, as well as number of wells might not be optimized
+
 - base on the first well, now draw wells to both sides using **azimuth** and  **spacing**, stop when the new drawing well won't intersect with the polygon (well outside of polygon).
 - then, we can go to next level, select the first well of the previous layer (either left most of right most), and then continue to draw wells using **azimuth**,  **leftLateralOffset** and **rightLateralOffset** until we go beyond the bounds of the polygon.
 - continue untill we finish up all layers.
 - with every wells drawed, the algortm will make sure the well line intersect with the polygon twice, and then if the well stick is more than **maxLength**, we reduce the well stick length to **maxLength** (I consider this is not optimized solution, we can improve this by find the first intersection with the polygon, then draw the line up to either maxLength, or the line intersect with the polygon again, whichever qualify first)
-- ![Algorithm Visualization](algorithm-visualization.png)
-The code is not math 100% with the steps, but this will help to visualize the strategy.
+![Algorithm Visualization](algorithm-visualization.png)
+
+The code is not match 100% with the steps, but this will help to visualize the strategy.
 
 ## How-to
 - Clone the project to your local
