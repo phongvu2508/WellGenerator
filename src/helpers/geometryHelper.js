@@ -114,7 +114,7 @@ function drawLineUntilIntersectWithPolygon(startPoint, azimuth, polygon, numberO
     points.push(intersection.geometry.coordinates);
   });
 
-  return points;
+  return turf.multiPoint(points);
 }
 
 function extendLineUntilIntersectTwiceWithPolygon(line, azimuth, polygon) {
@@ -134,28 +134,28 @@ function extendLineUntilIntersectTwiceWithPolygon(line, azimuth, polygon) {
 
   if (!isStartPointInPolygon) {
     // If Start Point is outside Polygon, draw to the right until we intersect twice with polygon
-    var newLine = drawLineUntilIntersectWithPolygon(startPoint, azimuth, polygon, 2);
+    var newLine = drawLineUntilIntersectWithPolygon(line[0], azimuth, polygon, 2);
 
     if (newLine) {
-      return turf.lineString([newLine[1], newLine[2]]);
+      return turf.lineString([newLine.geometry.coordinates[1], newLine.geometry.coordinates[2]]);
     }
   }
 
   if (!isEndPointInPolygon) {
     // If End Point is outside Polygon, draw to the left until we intersect twice with polygon
-    var newLine = drawLineUntilIntersectWithPolygon(endPoint, azimuth - 180, polygon, 2);
+    var newLine = drawLineUntilIntersectWithPolygon(line[1], azimuth - 180, polygon, 2);
 
     if (newLine) {
-      return turf.lineString([newLine[2], newLine[1]]);
+      return turf.lineString([newLine.geometry.coordinates[2], newLine.geometry.coordinates[1]]);
     }
   }
 
   // If we're here, this mean both start and end point are inside Polygon, just grab the start point and draw to left and right, we will have both intersections.
-  let leftLine = drawLineUntilIntersectWithPolygon(startPoint, azimuth - 180, polygon, 1);
-  let rightLine = drawLineUntilIntersectWithPolygon(startPoint, azimuth, polygon, 1);
+  let leftLine = drawLineUntilIntersectWithPolygon(line[0], azimuth - 180, polygon, 1);
+  let rightLine = drawLineUntilIntersectWithPolygon(line[0], azimuth, polygon, 1);
 
   if (leftLine && rightLine) {
-    return turf.lineString([leftLine[1], rightLine[1]]);
+    return turf.lineString([leftLine.geometry.coordinates[1], rightLine.geometry.coordinates[1]]);
   }
 
   return false;

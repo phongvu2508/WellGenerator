@@ -1,10 +1,6 @@
 'use strict'
 
 const { findStartingPoint,
-    findTopLeftPoint,
-    findTopRightPoint,
-    findBottomLeftPoint,
-    findBottomRightPoint,
     drawLineUntilIntersectWithPolygon,
     shortenLineWithMaxLength,
     drawLineParallelOffsetFromALine,
@@ -13,23 +9,14 @@ const { findAngleType } = require('./helpers/angleHelper')
 const { toWKTString } = require('./helpers/wktHelper');
 
 let _polygon;
-let _topLeftPoint;
-let _topRightPoint;
-let _bottomLeftPoint;
-let _bottomRightPoint;
 
 let _maxLength;
 let _azimuth;
 
 function generateHorizontalWells(polygon, azimuth, numberOfLayers, maxLength, spacing, initialDepth, leftLateralOffset, rightLateralOffset, layerVerticalOffset) {
 
-    // Catch current polygon and determind which is the most outline points for the polygon
+    // Catch reuseable value
     _polygon = polygon;
-    _topLeftPoint = findTopLeftPoint(polygon.coordinates[0]);
-    _topRightPoint = findTopRightPoint(polygon.coordinates[0]);
-    _bottomLeftPoint = findBottomLeftPoint(polygon.coordinates[0]);
-    _bottomRightPoint = findBottomRightPoint(polygon.coordinates[0]);
-
     _maxLength = maxLength;
     _azimuth = azimuth;
 
@@ -61,7 +48,7 @@ function generateHorizontalWells(polygon, azimuth, numberOfLayers, maxLength, sp
 }
 
 function generateFirstLayer(polygon, startingPoint, spacing, initialDepth) {
-    const lineCrossedPolygon = drawLineUntilIntersectWithPolygon(startingPoint, _azimuth, polygon, 2);
+    let lineCrossedPolygon = drawLineUntilIntersectWithPolygon(startingPoint, _azimuth, polygon, 2);
 
     if (!lineCrossedPolygon) {
         console.log("We got issue with drawing first well, either polygon is irregular and will not be supported, or there is some error on my calculation.")
@@ -74,35 +61,15 @@ function generateFirstLayer(polygon, startingPoint, spacing, initialDepth) {
 
     firstLayer.push(firstWell);
 
-    // Draw wells to the left side of the first well
-    let nextWell = firstWell;
-    while(nextWell != null){
-        nextWell = drawLineParallelOffsetFromALine(nextWell, spacing*-1);
-        lineCrossedPolygon = extendLineUntilIntersectTwiceWithPolygon(nextWell.geometry.coordinates, _azimuth, _polygon);
+    // generate wells to the left side of the first well
+    let wells = drawFollowingWellsFromFirstWell(firstWell, spacing * -1);
+    // inswer the wells into start of array
+    firstLayer.unshift(wells);
 
-        if (!lineCrossedPolygon) {
-            // If the well not intersect with the pylogon at all, we're out of the covering area
-            nextWell = null;
-        }
-
-        nextWell = shortenLineWithMaxLength([lineCrossedPolygon.geometry.coordinates[1], lineCrossedPolygon.geometry.coordinates[2]], _maxLength);
-        firstLayer.push(firstWell);
-    }
-
-    // Draw wells to the right side of the first well
-    nextWell = firstWell;
-    while(nextWell != null){
-        nextWell = drawLineParallelOffsetFromALine(nextWell, spacing);
-        lineCrossedPolygon = extendLineUntilIntersectTwiceWithPolygon(nextWell.geometry.coordinates, _azimuth, _polygon);
-
-        if (!lineCrossedPolygon) {
-            // If the well not intersect with the pylogon at all, we're out of the covering area
-            nextWell = null;
-        }
-
-        nextWell = shortenLineWithMaxLength([lineCrossedPolygon.geometry.coordinates[1], lineCrossedPolygon.geometry.coordinates[2]], _maxLength);
-        firstLayer.push(firstWell);
-    }
+    // generate wells to the right side of the first well
+    wells = drawFollowingWellsFromFirstWell(firstWell, spacing);
+    // inswer the well into end of array
+    firstLayer.push(wells);
 
     // Add depth data to each wells line
     firstLayer.forEach(well => {
@@ -115,6 +82,41 @@ function generateFirstLayer(polygon, startingPoint, spacing, initialDepth) {
 
 function generateLayer(polygon, previousLayer, leftLateralOffset, rightLateralOffset, verticalOffset) {
     //TODO
+}
+
+function drawFollowingWellsFromFirstWell(firstWell, spacing) {
+    const layer = [];
+
+    let nextWell = firstWell;
+
+    while (nextWell != null) {
+
+        // Create new well parallel from the last well
+        nextWell = drawLineParallelOffsetFromALine(nextWell, spacing);
+
+        // Make sure well intersect with the polygon twice
+        lineCrossedPolygon = extendLineUntilIntersectTwiceWithPolygon(nextWell.geometry.coordinates, _azimuth, _polygon);
+
+        if (!lineCrossedPolygon) {
+            // If the well not intersect with the pylogon at all, we're out of the covering area
+            nextWell = null;
+            break;
+        }
+
+        // Then, shorten the well by max length
+        nextWell = shortenLineWithMaxLength([lineCrossedPolygon.geometry.coordinates[0], lineCrossedPolygon.geometry.coordinates[1]], _maxLength);
+
+        // If spacing less than 0, we're drawing to the left of the first well
+        if (spacing < 0) {
+            // inswer the well into start of array
+            layer.unshift(nextWell);
+        } else {
+            // inswer the well into end of array
+            firstLayer.push(nextWell);
+        }
+    }
+
+    return layer;
 }
 
 module.exports = { generateHorizontalWells }
