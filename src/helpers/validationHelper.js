@@ -20,7 +20,7 @@ function tryParseFileSelection(input) {
 function tryParseAzimuth(input) {
     const value = parseInt(input);
 
-    if (!value || value < 0 || value > 360) {
+    if (!value || value < 0 || value > 180) {
         console.log("Invalid azimuth provided.");
         return false;
     }
@@ -64,7 +64,7 @@ function tryParseArrayOfPositiveInt(input) {
 
 function validateSpacing(spacing, leftLateralOffset, rightLateralOffset) {
 
-    if (leftLateralOffset + rightLateralOffset > spacing) {
+    if (leftLateralOffset + rightLateralOffset != spacing) {
         console.log(`Spacing between wells is ${spacing} conflicting with left and right lateral offset at ${leftLateralOffset} and ${rightLateralOffset}.`);
         return false;
     }

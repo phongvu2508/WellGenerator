@@ -61,7 +61,7 @@ const getAzimuth = () => {
             return;
         }
 
-        rl.question('Please enter the angle degree of the well: ', (answer) => {
+        rl.question('Please enter the angle degree of the well (we only support 0 to 180 for now): ', (answer) => {
             const value = tryParseAzimuth(answer);
 
             if (!value) {
@@ -268,7 +268,7 @@ const app = async () => {
     console.log("initialDepth : " + _initialDepth);
     console.log("leftLateralOffset : " + _leftLateralOffset);
     console.log("rightLateralOffset : " + _rightLateralOffset);
-    console.log("layerVerticalOffset : " + _layerVerticalOffset);
+    console.log(`layerVerticalOffset : ${_layerVerticalOffset}`);
 
     const wells = generateHorizontalWells(_geometry, _azimuth, _numberOfLayers, _maxLength, _spacing, _initialDepth, _leftLateralOffset, _rightLateralOffset, _layerVerticalOffset);
 

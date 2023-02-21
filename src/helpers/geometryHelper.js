@@ -1,7 +1,6 @@
 'use strict'
 
 const { AngleType } = require('../models')
-const { lineIntersect } = require('geojson');
 const turf = require('@turf/turf');
 
 function findTopLeftPoint(polygon) {
@@ -73,11 +72,6 @@ function findStartingPoint(polygon, angleType) {
   }
 }
 
-function findIntersection(polygon, line) {
-  //TODO: consider if we need to format line and polygon using geojson
-  return lineIntersect(line, polygon);
-}
-
 function drawLineUntilIntersectWithPolygon(startPoint, azimuth, polygon, numberOfIntersects = 2) {
   // We only try to draw the line 10 times to find both intersections with polygon.
   // After that either the line will never cross the polygon, or considered myself defeated for now.
@@ -146,7 +140,7 @@ function extendLineUntilIntersectTwiceWithPolygon(line, azimuth, polygon) {
     var newLine = drawLineUntilIntersectWithPolygon(line[1], azimuth - 180, polygon, 2);
 
     if (newLine) {
-      return turf.lineString([newLine.geometry.coordinates[2], newLine.geometry.coordinates[1]]);
+      return turf.lineString([newLine.geometry.coordinates[1], newLine.geometry.coordinates[2]]);
     }
   }
 
@@ -220,8 +214,7 @@ function toDegrees(radians) {
   return radians * 180 / Math.PI;
 }
 
-module.exports = { findStartingPoint, 
-                    findIntersection, 
+module.exports = { findStartingPoint,
                     findTopLeftPoint, 
                     findTopRightPoint, 
                     findBottomLeftPoint, 
